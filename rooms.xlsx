@@ -1,0 +1,8 @@
+4
+2002 10 5
+2005 20 10
+2102 15 6
+2105 10 10
+
+// First row has no of rooms
+//Then each row in the table will have room no., no of rows and no of columns
