@@ -1,6 +1,8 @@
 from Tkinter import *
 from openpyxl import *
 from tkFileDialog import askopenfilename
+from operator import *
+from datetime import datetime
 
 class Invigilator:
   def __init__(self,email="",name="",noOfExams=0,courses = []):
@@ -55,7 +57,7 @@ class TimeTable :
       rowNo = str(i+2)
       self.examCode = self.ttSheet['A'+rowNo].value
       self.examName = self.ttSheet['B'+rowNo].value
-      self.examTime = self.ttSheet['C'+rowNo].value
+      self.examTime = datetime.strptime(self.ttSheet['C'+rowNo].value, '%d-%m-%Y %I:%M%p')
       self.noOfStudents = self.ttSheet['D'+rowNo].value
       self.exam = Exam(courseTitle = self.examName, courseCode = self.examCode, examTime = self.examTime, noOfStudents = self.noOfStudents)
       self.examList.append(self.exam)
@@ -79,10 +81,34 @@ class TimeTable :
      print self.roomList[i].roomNo,self.roomList[i].rows,self.roomList[i].columns
     return 0
 
-  def verifyTimeTable():
-    return 0
+  def verifyTimeTable(self):
+    self.capacity = 0
+    self.totalStudents = 0
+    for self.room in self.roomList: 
+      self.capacity = self.capacity + (self.room.rows)*(self.room.columns)
+    self.newList = sorted(self.examList, key=attrgetter('examTime'), reverse=False)
+    self.prevTime = None
+    self.slotStudents = 0
+    self.valid = 1
+    print "Total capacity is : ",self.capacity
+    for self.exam in self.newList:
+      if(self.exam.examTime == self.prevTime):
+        self.slotStudents = self.slotStudents + self.exam.noOfStudents
+        #print self.exam.examTime,self.slotStudents
+      else:
+        if(self.slotStudents > self.capacity):
+          print " Error : At slot",self.prevTime,"the total students sitting for exam is",self.slotStudents,"which exceeds capacity",self.capacity
+          self.valid = 0
+        self.slotStudents = self.exam.noOfStudents
+      self.prevTime = self.exam.examTime
+    if(self.slotStudents > self.capacity):
+      print " Error : At slot",self.prevTime,"the total students sitting for exam is",self.slotStudents,"which exceeds capacity",self.capacity
+      self.valid = 0
+    #print self.newList[1].examTime,self.newList[2].examTime;
+    print "Time-table validity is : ",self.valid,"  ('1' if valid, '0' if invalid)"
+    return self.valid
 
-  def getTimeTable():
+  def getTimeTable(self):
     return 0
 
 class Exam:
@@ -134,8 +160,10 @@ class Example(Frame):
 
   def initUI(self):
     self.parent.title("Browse files " )
-    self.fileSelectLBL = Label(self, text = "Please select Time-table file : ")
-    self.fileSelectLBL.pack()
+    fileSelectLBL = Label(self.parent, text = "Please select Time-table file : ")
+    fileSelectLBL.pack()
+    self.lbl = Label(self.parent,text="Please browse files: ")
+    self.lbl.pack()
     print "Creating button now"
     self.ttbutton = Button(self.parent,text = "Browse Time-table", command = self.load_tt)
     self.ttbutton.pack(side="left")
@@ -155,19 +183,18 @@ class Example(Frame):
     self.rl = askopenfilename(filetypes = ftypes)
 
   def submit(self):
-    lbl = Label(self.parent,text="Please browse files: ")
-    lbl.pack()
     print self.f1
     print self.rl
     if ((self.f1=="") or (self.rl=="")):
-      lbl.config(text="Cannot open input files are not provided.")
-      lbl.pack()
+      self.lbl.config(text="Cannot open input files are not provided.")
+      self.lbl.pack()
     else :
-      lbl.config(text="Getting data")
+      self.lbl.config(text="Getting data")
       tt = TimeTable()
       tt.readTimeTable(ttFile = self.f1)
       tt.readRoomList(rlFile = self.rl)
     print "Got !"
+    tt.verifyTimeTable()
 
 def main():
   window = Tk()
