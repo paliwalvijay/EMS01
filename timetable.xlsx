@@ -1,7 +1,8 @@
-3     |                                      |            |
-CS211 | Computer Organization & Architecture | 09-02-2016 | 60
-CS223 | Software Engineering                 | 10-02-2016 | 150
-MA221 | Probability, Statistics & RP         | 11-02-2016 | 130
+4     |                                      |                   |
+CS211 | Computer Organization & Architecture | 09-02-2016 1:30PM | 600
+CS223 | Software Engineering                 | 10-02-2016 1:30PM | 150
+MA221 | Probability, Statistics & RP         | 11-02-2016 10:00AM| 530
+CS222 | Theory Of Computation                | 11-02-2016 1:30PM | 120
 
 //First row has no of exams
 // Each row has exam code, course name, date and time and no of registerd students
