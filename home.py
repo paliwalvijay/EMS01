@@ -1,5 +1,6 @@
 from Tkinter import *
 from openpyxl import *
+import tkMessageBox
 from tkFileDialog import askopenfilename
 from operator import *
 from datetime import datetime
@@ -57,7 +58,7 @@ class TimeTable :
       rowNo = str(i+2)
       self.examCode = self.ttSheet['A'+rowNo].value
       self.examName = self.ttSheet['B'+rowNo].value
-      self.examTime = datetime.strptime(self.ttSheet['C'+rowNo].value, '%d-%m-%Y %I:%M%p')
+      self.examTime = self.ttSheet['C'+rowNo].value
       self.noOfStudents = self.ttSheet['D'+rowNo].value
       self.exam = Exam(courseTitle = self.examName, courseCode = self.examCode, examTime = self.examTime, noOfStudents = self.noOfStudents)
       self.examList.append(self.exam)
@@ -156,24 +157,54 @@ class Example(Frame):
     Frame.__init__(self,parent)
     self.parent = parent
     print "Inside Example __init__"
-    self.initUI()
+    self.main2()
+#    self.initUI()
 
   def initUI(self):
+    self.frame.destroy()
     self.parent.title("Browse files " )
-    fileSelectLBL = Label(self.parent, text = "Please select Time-table file : ")
-    fileSelectLBL.pack()
-    self.lbl = Label(self.parent,text="Please browse files: ")
-    self.lbl.pack()
+    self.fr=Frame(self.parent)
+    self.fr.pack()
+    self.fileSelectLBL = Label(self, text = "Please select Time-table file : ")
+    self.fileSelectLBL.pack()
     print "Creating button now"
-    self.ttbutton = Button(self.parent,text = "Browse Time-table", command = self.load_tt)
+    self.ttbutton = Button(self.fr,text = "Browse Time-table", command = self.load_tt)
     self.ttbutton.pack(side="left")
-    self.rlbutton = Button(self.parent,text = "Browse Rooms-List", command = self.load_rl)
+    self.rlbutton = Button(self.fr,text = "Browse Rooms-List", command = self.load_rl)
     self.rlbutton.pack(side="left")
-    self.subbutton = Button(self.parent,text = "Submit", command = self.submit)
+    self.subbutton = Button(self.fr,text = "Submit", command = self.submit)
     self.subbutton.pack(side="left")
+    self.back = Button(self.fr,text = "back", command = self.dest)
+    self.back.pack(side="left")
     self.f1 = ""
     self.rl = ""
 
+  def dest(self):
+    self.fr.destroy()
+    self.main2()
+
+  def main2(self):
+    self.parent.title("Main Page " )
+    self.frame = Frame(self.parent)
+    self.frame1 = Frame(self.frame)
+    self.frame2 = Frame(self.frame)
+    self.frame3 = Frame(self.frame)
+    self.frame4 = Frame(self.frame)
+
+    self.B = Button(self.frame1, text ="Mail GuideLines",pady=10)
+    self.B.pack(expand=True)
+    self.C = Button(self.frame2,text = "Generate Seting Plan",pady=10,command=self.initUI)
+    self.C.pack(expand=True)
+    self.D = Button(self.frame3,text = "Makeup Manager",pady=10)
+    self.D.pack(expand=True)
+    self.E = Button(self.frame4, text ="Help",pady=10)
+    self.E.pack(expand= True)
+    self.frame.pack()
+    self.frame1.pack(side='top',fill='both',expand=True)
+    self.frame2.pack(side='top',fill='both',expand=True)
+    self.frame3.pack(side='top',fill='both',expand=True)
+    self.frame4.pack(side='bottom',fill='both',expand=True)
+    
   def load_tt(self, ftypes = None):
     ftypes = [("Excel files","*.xlsx")]
     self.f1 = askopenfilename(filetypes = ftypes)
@@ -182,26 +213,79 @@ class Example(Frame):
     ftypes = [("Excel files","*.xlsx")]
     self.rl = askopenfilename(filetypes = ftypes)
 
+  def load_studFile(self,ftypes = None):
+    ftypes = [("Excel files","*.xlsx")]
+    self.studFile = askopenfilename(filetypes = ftypes)
+
+  def load_instrFile(self,ftypes = None):
+    ftypes = [("Excel files","*.xlsx")]
+    self.instrFile = askopenfilename(filetypes = ftypes)
+
   def submit(self):
+    #lbl = Label(self.parent,text="Please Browse Files: ")
+    #lbl.pack()
     print self.f1
     print self.rl
     if ((self.f1=="") or (self.rl=="")):
-      self.lbl.config(text="Cannot open input files are not provided.")
-      self.lbl.pack()
+      tkMessageBox.showinfo("Error", "No input files provided")
     else :
-      self.lbl.config(text="Getting data")
-      tt = TimeTable()
-      tt.readTimeTable(ttFile = self.f1)
-      tt.readRoomList(rlFile = self.rl)
+     # lbl.config(text="Getting data")
+      self.tt = TimeTable()
+      self.tt.readTimeTable(ttFile = self.f1)
+      self.tt.readRoomList(rlFile = self.rl)
+      validity = self.tt.verifyTimeTable()
+      self.fr.destroy()
+      self.parent.title("Some more files please: " )
+      self.frame = Frame(self.parent)
+      self.B = Button(self.frame, text ="Please select Students List File: ",pady=10,command = self.load_studFile)
+      self.C = Button(self.frame, text ="Please select Instructors List: ",pady=10,command = self.load_instrFile)
+      self.D = Button(self.frame, text ="Submit", pady=10,command = self.generateAll)
+      self.B.pack(expand=True)
+      self.C.pack(expand=True)
+      self.D.pack(expand=True)
+      self.frame.pack()
+    self.studFile = ""
+    self.instrFile = ""
     print "Got !"
-    tt.verifyTimeTable()
 
-def main():
+  def generateAll(self):
+    print self.studFile
+    print self.instrFile
+    self.studBook  = load_workbook(self.studFile)
+    self.studSheet = self.studBook.active
+    self.noStudents = self.studSheet['A1'].value
+    i = 0
+    self.studentList = []
+    curr=1;
+    for i in range (0,self.noStudents):
+      curr=curr+1
+      rowNo = str(curr)
+      self.name = self.studSheet['A'+rowNo].value
+      self.rollNo = self.studSheet['B'+rowNo].value
+      self.email = self.studSheet['C'+rowNo].value
+      self.noOfCourses = self.studSheet['D'+rowNo].value
+      j = 0
+      self.courseList = []
+      for j in range (0,self.noOfCourses):
+        curr = curr+1
+        rowNo = str(curr)
+        self.courseList.append(self.studSheet['A'+rowNo].value)
+      self.student = Student(name = self.name,rollNo = self.rollNo,email=self.email,courseList = self.courseList)
+      self.studentList.append(self.student)
+      stud = None
+    for stud in self.studentList:
+      print stud.name,stud.rollNo,stud.email
+      for self.course in stud.courseList:
+        print self.course
+    return 0
+
+def main(): 
   window = Tk()
   print "inside main"
   ex = Example(window)
   window.geometry("900x400")
   window.title("Exam Management Software")
+  
   #i1 = Invigilator(name= "Vijay", email = "paliwal.2@iitj.ac.in",noOfExams = 2 , courses = ["Physics","Maths","COA"])
   #i2 = Invigilator(name = "Dinesh")
   #print i1.name," ",i1.email," ",i1.noOfExams," ",i1.courses;
