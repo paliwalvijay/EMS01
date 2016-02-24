@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from Tkinter import *
 from openpyxl import *
 import tkMessageBox
@@ -127,7 +129,7 @@ class Student:
     self.email = email
 
 class Course:
-  def __init__(self,courseTitle,courseCode,studentList,instructor):
+  def __init__(self,courseTitle="",courseCode="",studentList=[],instructor=""):
     self.courseTitle = courseTitle
     self.courseCode = courseCode
     self.studentList = studentList
@@ -256,7 +258,8 @@ class Example(Frame):
     self.noStudents = self.studSheet['A1'].value
     i = 0
     self.studentList = []
-    curr=1;
+    self.courses = []
+    curr=1
     for i in range (0,self.noStudents):
       curr=curr+1
       rowNo = str(curr)
@@ -270,6 +273,16 @@ class Example(Frame):
         curr = curr+1
         rowNo = str(curr)
         self.courseList.append(self.studSheet['A'+rowNo].value)
+        found = 0
+        self.corCode = self.studSheet['A'+rowNo].value
+        self.corValue = self.studSheet['B'+rowNo].value
+        for self.item in self.courses:
+          if (self.item.courseCode == self.corCode):
+            found = 1
+            self.item.studentList.append(self.rollNo)
+        if (found == 0):
+          self.courses.append(Course(courseCode = self.corCode,courseTitle = self.corValue,studentList = [self.rollNo]))
+        found = 0
       self.student = Student(name = self.name,rollNo = self.rollNo,email=self.email,courseList = self.courseList)
       self.studentList.append(self.student)
       stud = None
@@ -277,7 +290,15 @@ class Example(Frame):
       print stud.name,stud.rollNo,stud.email
       for self.course in stud.courseList:
         print self.course
+    stri = None
+    for stud in self.courses:
+      print stud.courseCode,stud.courseTitle
+      for stri in stud.studentList:
+        print stri
     return 0
+
+  def generateSeatingArrangement(self):
+    print self.courseList
 
 def main(): 
   window = Tk()
