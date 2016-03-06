@@ -6,7 +6,8 @@ import tkMessageBox
 from tkFileDialog import askopenfilename
 from operator import *
 from datetime import datetime
-
+from pymongo import MongoClient
+from copy import *
 class Invigilator:
   def __init__(self,email="",name="",noOfExams=0,courses = []):
     self.email = email
@@ -90,6 +91,10 @@ class TimeTable :
     for self.room in self.roomList: 
       self.capacity = self.capacity + (self.room.rows)*(self.room.columns)
     self.newList = sorted(self.examList, key=attrgetter('examTime'), reverse=False)
+    self.examList = self.newList
+    i = 0
+    for i in range (0,self.noExams):
+      print self.examList[i].courseTitle,self.examList[i].courseCode,self.examList[i].examTime,self.examList[i].noOfStudents
     self.prevTime = None
     self.slotStudents = 0
     self.valid = 1
@@ -129,11 +134,18 @@ class Student:
     self.email = email
 
 class Course:
-  def __init__(self,courseTitle="",courseCode="",studentList=[],instructor=""):
+  def __init__(self,courseTitle="",courseCode="",studentList=[],instructor="",noOfStudents=0):
     self.courseTitle = courseTitle
     self.courseCode = courseCode
     self.studentList = studentList
     self.instructor = instructor
+    self.noOfStudents = noOfStudents
+
+class SeatingArrangement:
+  def __init__(self,roomList=[],attendanceList=[],time=None):
+    self.roomList = roomList
+    self.attendanceList = attendanceList
+    self.time = time
 
 class Faculty:
   def __init__(self,name,email,courseList):
@@ -148,11 +160,17 @@ class Faculty:
     courseList = courseList
 
 class Room:
-  def __init__(self,roomNo,rows,columns,studentList = [[]]):
+  def __init__(self,roomNo,rows,columns,studentList = []):
     self.roomNo = roomNo
     self.rows = rows
     self.columns = columns
-    self.studentList = studentList
+    if(len(studentList)!=0):
+      self.studentList = studentList
+    else:
+      i = 0
+      self.studentList=[]
+      for i in range(0,self.columns):
+        self.studentList.append([])
 
 class Example(Frame):
   def __init__(self,parent):
@@ -280,8 +298,9 @@ class Example(Frame):
           if (self.item.courseCode == self.corCode):
             found = 1
             self.item.studentList.append(self.rollNo)
+            self.item.noOfStudents = self.item.noOfStudents+1
         if (found == 0):
-          self.courses.append(Course(courseCode = self.corCode,courseTitle = self.corValue,studentList = [self.rollNo]))
+          self.courses.append(Course(courseCode = self.corCode,courseTitle = self.corValue,studentList = [self.rollNo],noOfStudents=1))
         found = 0
       self.student = Student(name = self.name,rollNo = self.rollNo,email=self.email,courseList = self.courseList)
       self.studentList.append(self.student)
@@ -292,16 +311,183 @@ class Example(Frame):
         print self.course
     stri = None
     for stud in self.courses:
-      print stud.courseCode,stud.courseTitle
+      print stud.courseCode,stud.courseTitle,stud.noOfStudents
       for stri in stud.studentList:
         print stri
+    self.generateSeatingArrangement();
     return 0
 
   def generateSeatingArrangement(self):
-    print self.courseList
+    stud = None
+    #self.courses = sorted(self.courses, key=attrgetter('noOfStudents'), reverse=True)
+    ## Here is our algorithm, working on processed data
+    #self.row1 = None
+    #self.tt.roomList[1].studentList.append(self.row1)
+    self.roomList = self.tt.roomList
+    self.salist = []
+    self.examList = []
+    self.prevTime = None
+    #self.examPr = None
+    for self.exam in self.tt.examList:
+      if(self.exam.examTime==self.prevTime):
+        self.examList.append(self.exam)
+      else:
+        ###### ALGORITHM SHOULD BE WORKING IN THIS PART
+        if (len(self.examList)==0):
+          self.examList.append(self.exam)
+          self.prevTime = self.exam.examTime
+          continue
+        k=0
+        self.roomList = []
+        self.roomList = deepcopy(self.tt.roomList)
+        for self.examPr in self.examList:
+          self.noOfStudents = self.examPr.noOfStudents
+          print "Inside for ",self.noOfStudents,self.examPr.courseTitle,self.examPr.courseCode
+          self.courseCode = self.examPr.courseCode
+          self.studentList=[]
+          for self.cour in self.courses:
+            if self.cour.courseCode == self.courseCode:
+              self.studentList = self.cour.studentList
+              break
+          count = 0
+          for self.room in self.roomList:
+            col = 1
+            var = 0
+            self.row1 = []
+            j=0
+            for j in range (0,len(self.room.studentList)):
+              #print self.row1
+              if(col%2==1):
+                if(len(self.room.studentList[j])!=self.room.rows):
+                  for var in range (len(self.room.studentList[j]),self.room.rows):
+                    if(count < len(self.studentList)):
+                      print 'count= ',count
+                      self.room.studentList[j].append(self.studentList[count])
+                      count = count + 1
+                    else:
+                      break
+              col = col+1
+            if(count >= len(self.studentList)):
+              break
+            for self.room in self.roomList:
+              col = 1
+              var = 0
+              self.row1 = []
+              j=0
+              for j in range (0,len(self.room.studentList)):
+                #print self.row1
+                if(col%2==0):
+                  if(len(self.room.studentList[j])!=self.room.rows):
+                    for var in range (len(self.room.studentList[j]),self.room.rows):
+                      if(count < len(self.studentList)):
+                        print 'count= ',count
+                        self.room.studentList[j].append(self.studentList[count])
+                        count = count + 1
+                      else:
+                        break
+                col = col+1
+              if(count >= len(self.studentList)):
+                break
+        #Here we add a sa object
+        self.sa = SeatingArrangement(roomList = self.roomList,time = self.prevTime)
+        self.salist.append(self.sa)
+        ###### ALGORITHM PART ENDS HERE
+        self.examList = []
+        self.examList.append(self.exam)
+        self.prevTime = self.exam.examTime
+
+    ###### ALGORITHM SHOULD BE WORKING IN THIS PART
+    k=0
+    self.roomList = []
+    self.roomList = deepcopy(self.tt.roomList)
+    for self.examPr in self.examList:
+      self.noOfStudents = self.examPr.noOfStudents
+      print "Inside for ",self.noOfStudents,self.examPr.courseTitle,self.examPr.courseCode
+      self.courseCode = self.examPr.courseCode
+      self.studentList=[]
+      for self.cour in self.courses:
+        if self.cour.courseCode == self.courseCode:
+          self.studentList = self.cour.studentList
+          break
+      count = 0
+      for self.room in self.roomList:
+        col = 1
+        var = 0
+        self.row1 = []
+        j=0
+        for j in range (0,len(self.room.studentList)):
+          #print self.row1
+          if(col%2==1):
+            if(len(self.room.studentList[j])!=self.room.rows):
+              for var in range (len(self.room.studentList[j]),self.room.rows):
+                if(count < len(self.studentList)):
+                  print 'count= ',count
+                  self.room.studentList[j].append(self.studentList[count])
+                  count = count + 1
+                else:
+                  break
+          col = col+1
+        if(count >= len(self.studentList)):
+          break
+      for self.room in self.roomList:
+        col = 1
+        var = 0
+        self.row1 = []
+        j=0
+        for j in range (0,len(self.room.studentList)):
+          #print self.row1
+          if(col%2==0):
+            if(len(self.room.studentList[j])!=self.room.rows):
+              for var in range (len(self.room.studentList[j]),self.room.rows):
+                if(count < len(self.studentList)):
+                  print 'count= ',count
+                  self.room.studentList[j].append(self.studentList[count])
+                  count = count + 1
+                else:
+                  break
+          col = col+1
+        if(count >= len(self.studentList)):
+          break
+
+    #Here we add a sa object
+    self.sa = SeatingArrangement(roomList = self.roomList,time = self.prevTime)
+    self.salist.append(self.sa)
+    ###### ALGORITHM PART ENDS HERE
+    self.examList = []
+    self.examList.append(self.exam)
+    self.prevTime = self.exam.examTime
+    for self.sa in self.salist:
+      print len(self.sa.roomList)
+      print self.sa.time
+      for self.room in self.sa.roomList:
+        for self.row1 in self.room.studentList:
+          print "List"
+          for self.student in self.row1:
+            print self.student
+
+    #for self.course in self.courses:
+    #  for self.room in self.roomList:
 
 def main(): 
   window = Tk()
+  '''
+  from pymongo import MongoClient
+  client = MongoClient()
+  db = client.newdb
+  import datetime
+  myrecord = {
+          "author": "Duke",
+          "title" : "PyMongo 101",
+          "tags" : ["MongoDB", "PyMongo", "Tutorial"],
+          "date" : datetime.datetime.utcnow()
+          }
+  record_id = db.mytable.insert(myrecord)
+  print record_id
+  print db.collection_names()
+  cursor = db.mytable.find()
+  for document in cursor:
+    print(document)
+  '''
   print "inside main"
   ex = Example(window)
   window.geometry("900x400")
