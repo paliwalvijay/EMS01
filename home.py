@@ -371,7 +371,7 @@ class Example(Frame):
               col = col+1
             if(count >= len(self.studentList)):
               break
-            for self.room in self.roomList:
+          for self.room in self.roomList:
               col = 1
               var = 0
               self.row1 = []
@@ -478,14 +478,14 @@ class Example(Frame):
             rowNo = rowNo + 1
           colNo = colNo + 1
         wb.save(self.path+'/SA_'+str(self.room.roomNo)+".xlsx")
-    for self.sa in self.salist:
-      print self.sa.time
-      for self.room in self.sa.roomList:
-        for self.row1 in self.room.studentList:
-          print "List"
-          for self.student in self.row1:
-            print self.student
-
+    #for self.sa in self.salist:
+    #  print self.sa.time
+    #  for self.room in self.sa.roomList:
+    #    for self.row1 in self.room.studentList:
+    #      print "List"
+    #      for self.student in self.row1:
+    #       print self.student
+    #
     #for self.course in self.courses:
     #  for self.room in self.roomList:
 
