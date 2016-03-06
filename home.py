@@ -8,6 +8,8 @@ from operator import *
 from datetime import datetime
 from pymongo import MongoClient
 from copy import *
+from os import *
+
 class Invigilator:
   def __init__(self,email="",name="",noOfExams=0,courses = []):
     self.email = email
@@ -457,7 +459,26 @@ class Example(Frame):
     self.examList.append(self.exam)
     self.prevTime = self.exam.examTime
     for self.sa in self.salist:
-      print len(self.sa.roomList)
+      try:
+        self.path = "/home/vijay_paliwal/Codes/python"
+        self.path = self.path+"/SA_"+self.sa.time
+        mkdir(self.path,0744)
+      except OSError:
+        pass
+      listAlpha = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+      for self.room in self.sa.roomList:
+        colNo = 0
+        wb  = Workbook()
+        ws = wb.active
+        ws['A1'] = str(self.sa.time)+" Room No. " +str(self.room.roomNo)
+        for self.row1 in self.room.studentList:
+          rowNo = 2
+          for self.student in self.row1:
+            ws[listAlpha[colNo]+str(rowNo)] = self.student
+            rowNo = rowNo + 1
+          colNo = colNo + 1
+        wb.save(self.path+'/SA_'+str(self.room.roomNo)+".xlsx")
+    for self.sa in self.salist:
       print self.sa.time
       for self.room in self.sa.roomList:
         for self.row1 in self.room.studentList:
