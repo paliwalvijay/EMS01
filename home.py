@@ -796,24 +796,6 @@ class Example(Frame):
 
 def main(): 
   window = Tk()
-  '''
-  from pymongo import MongoClient
-  client = MongoClient()
-  db = client.newdb
-  import datetime
-  myrecord = {
-          "author": "Duke",
-          "title" : "PyMongo 101",
-          "tags" : ["MongoDB", "PyMongo", "Tutorial"],
-          "date" : datetime.datetime.utcnow()
-          }
-  record_id = db.mytable.insert(myrecord)
-  print record_id
-  print db.collection_names()
-  cursor = db.mytable.find()
-  for document in cursor:
-    print(document)
-  '''
   print "inside main"
   ex = Example(window)
   window.geometry("500x400")
