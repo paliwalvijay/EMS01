@@ -135,6 +135,12 @@ class Student:
     self.courseList = courseList  #List of course codes
     self.email = email
 
+class AttendanceSheet:
+  def __init__(self,roomNo,courseCode="",studentList=[]):
+    self.courseCode = courseCode
+    self.studentList = studentList
+    self.roomNo = roomNo
+
 class Course:
   def __init__(self,courseTitle="",courseCode="",studentList=[],instructor="",noOfStudents=0):
     self.courseTitle = courseTitle
@@ -346,10 +352,10 @@ class Example(Frame):
           self.noOfStudents = self.examPr.noOfStudents
           print "Inside for ",self.noOfStudents,self.examPr.courseTitle,self.examPr.courseCode
           self.courseCode = self.examPr.courseCode
-          self.studentList=[]
+          self.studentList1=[]
           for self.cour in self.courses:
             if self.cour.courseCode == self.courseCode:
-              self.studentList = self.cour.studentList
+              self.studentList1 = self.cour.studentList
               break
           count = 0
           for self.room in self.roomList:
@@ -362,14 +368,14 @@ class Example(Frame):
               if(col%2==1):
                 if(len(self.room.studentList[j])!=self.room.rows):
                   for var in range (len(self.room.studentList[j]),self.room.rows):
-                    if(count < len(self.studentList)):
+                    if(count < len(self.studentList1)):
                       print 'count= ',count
-                      self.room.studentList[j].append(self.studentList[count])
+                      self.room.studentList[j].append(self.studentList1[count])
                       count = count + 1
                     else:
                       break
               col = col+1
-            if(count >= len(self.studentList)):
+            if(count >= len(self.studentList1)):
               break
           for self.room in self.roomList:
               col = 1
@@ -381,14 +387,14 @@ class Example(Frame):
                 if(col%2==0):
                   if(len(self.room.studentList[j])!=self.room.rows):
                     for var in range (len(self.room.studentList[j]),self.room.rows):
-                      if(count < len(self.studentList)):
+                      if(count < len(self.studentList1)):
                         print 'count= ',count
-                        self.room.studentList[j].append(self.studentList[count])
+                        self.room.studentList[j].append(self.studentList1[count])
                         count = count + 1
                       else:
                         break
                 col = col+1
-              if(count >= len(self.studentList)):
+              if(count >= len(self.studentList1)):
                 break
         #Here we add a sa object
         self.sa = SeatingArrangement(roomList = self.roomList,time = self.prevTime)
@@ -406,10 +412,10 @@ class Example(Frame):
       self.noOfStudents = self.examPr.noOfStudents
       print "Inside for ",self.noOfStudents,self.examPr.courseTitle,self.examPr.courseCode
       self.courseCode = self.examPr.courseCode
-      self.studentList=[]
+      self.studentList1=[]
       for self.cour in self.courses:
         if self.cour.courseCode == self.courseCode:
-          self.studentList = self.cour.studentList
+          self.studentList1 = self.cour.studentList
           break
       count = 0
       for self.room in self.roomList:
@@ -422,14 +428,14 @@ class Example(Frame):
           if(col%2==1):
             if(len(self.room.studentList[j])!=self.room.rows):
               for var in range (len(self.room.studentList[j]),self.room.rows):
-                if(count < len(self.studentList)):
+                if(count < len(self.studentList1)):
                   print 'count= ',count
-                  self.room.studentList[j].append(self.studentList[count])
+                  self.room.studentList[j].append(self.studentList1[count])
                   count = count + 1
                 else:
                   break
           col = col+1
-        if(count >= len(self.studentList)):
+        if(count >= len(self.studentList1)):
           break
       for self.room in self.roomList:
         col = 1
@@ -441,14 +447,14 @@ class Example(Frame):
           if(col%2==0):
             if(len(self.room.studentList[j])!=self.room.rows):
               for var in range (len(self.room.studentList[j]),self.room.rows):
-                if(count < len(self.studentList)):
+                if(count < len(self.studentList1)):
                   print 'count= ',count
-                  self.room.studentList[j].append(self.studentList[count])
+                  self.room.studentList[j].append(self.studentList1[count])
                   count = count + 1
                 else:
                   break
           col = col+1
-        if(count >= len(self.studentList)):
+        if(count >= len(self.studentList1)):
           break
 
     #Here we add a sa object
@@ -460,24 +466,99 @@ class Example(Frame):
     self.prevTime = self.exam.examTime
     for self.sa in self.salist:
       try:
-        self.path = "/home/vijay_paliwal/Codes/python"
+        self.path = "/home/vijay_paliwal/Codes/python/Project/Output"
         self.path = self.path+"/SA_"+self.sa.time
         mkdir(self.path,0744)
       except OSError:
         pass
-      listAlpha = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+      listAlpha = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']   #Limits no. of columns to 26
+      self.examList = []
+      for self.exam in self.tt.examList:
+        if(self.exam.examTime == self.sa.time):
+          self.examList.append(self.exam)
+          #print self.exam.courseCode
       for self.room in self.sa.roomList:
         colNo = 0
         wb  = Workbook()
         ws = wb.active
+        self.attendanceLists = []
         ws['A1'] = str(self.sa.time)+" Room No. " +str(self.room.roomNo)
         for self.row1 in self.room.studentList:
           rowNo = 2
           for self.student in self.row1:
             ws[listAlpha[colNo]+str(rowNo)] = self.student
             rowNo = rowNo + 1
+            got = 0
+            #print "Will locate student: ",self.student
+            for self.exam in self.examList:
+              #print "Loop1 ",self.exam.courseCode
+              for self.cour in self.courses:
+                #print "Loop2 ",self.cour.courseCode
+                if self.cour.courseCode == self.exam.courseCode:
+                  for self.stud in self.cour.studentList:
+                    #print "Loop3, searching for : ",self.student," found : ",self.stud
+                    if self.stud == self.student:
+                      succ = 0
+                      for self.attList in self.attendanceLists:
+                        #print "Loop4, searching for ",self.cour.courseCode," found: ",self.attList.courseCode
+                        if (self.attList.courseCode == self.cour.courseCode):
+                          self.attList.studentList.append(self.student)
+                          succ=1
+                          got = 1
+                          break
+                      if (succ==0):
+                        #print "Creating for ",self.cour.courseCode
+                        self.atten = AttendanceSheet(roomNo = self.room.roomNo,courseCode=self.cour.courseCode,studentList=[self.student])
+                        self.attendanceLists.append(self.atten)
+                        got = 1
+                        break
+                    if(got==1):
+                      break
+                if(got == 1):
+                  break
+              if(got==1):
+                break
           colNo = colNo + 1
+        ws.column_dimensions["A"].width = 40.0
+        ws.row_dimensions[1].height = 20
+        fontObj2 = styles.Font(size=16, italic=True)
+        styleObj2 = styles.Style(font=fontObj2)
+        ws['A1'].style = styleObj2
         wb.save(self.path+'/SA_'+str(self.room.roomNo)+".xlsx")
+
+        print "Size of list: ",len(self.attendanceLists)
+        print "Room No.: ",self.room.roomNo
+        for self.att in self.attendanceLists:
+          self.path = "/home/vijay_paliwal/Codes/python/Project/Output"
+          self.path = self.path+"/SA_"+self.sa.time
+          try:
+            mkdir(self.path+"/Attendance_Sheets_RoomNo"+str(self.att.roomNo))
+          except OSError:
+            pass
+          self.wb = Workbook()
+          self.ws = self.wb.active
+          self.ws['A1']= 'Attendance Sheet '+str(self.att.courseCode)+"Room No.:"+str(self.room.roomNo)
+          self.ws['A2']="Name"
+          self.ws['B2']="Signature"
+          row = 3
+          for self.stu in self.att.studentList:
+            for self.st in self.studentList:
+              if (self.st.rollNo == self.stu):
+                self.stu = self.st.name+"( "+self.stu+" )"
+                break
+            self.ws['A'+str(row)] = self.stu
+            row = row+1
+          self.ws.column_dimensions["A"].width = 40.0
+          self.ws.row_dimensions[1].height = 20
+          fontObj2 = styles.Font(size=16, italic=True)
+          styleObj2 = styles.Style(font=fontObj2)
+          self.ws['A1'].style = styleObj2
+          self.wb.save(self.path+"/Attendance_Sheets_RoomNo"+str(self.att.roomNo)+"/Attendance_Sheet_"+str(self.att.courseCode)+".xlsx")
+          print self.att.courseCode
+          for self.sRoll in self.att.studentList:
+            print self.sRoll
+
+
     #for self.sa in self.salist:
     #  print self.sa.time
     #  for self.room in self.sa.roomList:
