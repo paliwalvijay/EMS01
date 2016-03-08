@@ -16,6 +16,10 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from smtplib import SMTP
 from os import system
+import random
+from PIL import ImageTk
+import tkFont
+import re
 
 class Invigilator:
   def __init__(self,email="",name="",noOfExams=0,courses = []):
@@ -31,30 +35,6 @@ class Resource:
     self.extraSheets = extraSheets
     self.tag = tag
 
-class UI:
-  def verifyTimeTable():
-    return 0
- 
-  def generateAttendanceSheet():
-    return 0
-
-  def getAttendanceSheet():
-    return 0
-
-  def mailSeatingPlan():
-    return 0
-
-  def notifyMakeupExam():
-    return 0
-
-  def updateMakeupDB():
-    return 0
-
-  def getInvigilatorDuty():
-    return 0
-
-  def sendExamGuidelines():
-    return 0
 
 class TimeTable :
   def __init__(self,examList=[],roomList=[]):
@@ -189,133 +169,14 @@ class Room:
       for i in range(0,self.columns):
         self.studentList.append([])
 
-class Example(Frame):
-  def __init__(self,parent):
-    Frame.__init__(self,parent)
-    self.parent = parent
-    print "Inside Example __init__"
-    self.main2()
-#    self.initUI()
-
-  def initUI(self):
-    self.frame.destroy()
-    self.parent.title("Browse files " )
-    self.fr=Frame(self.parent)
-    self.fr.pack()
-    self.fileSelectLBL = Label(self, text = "Please select Time-table file : ")
-    self.fileSelectLBL.pack()
-    print "Creating button now"
-    self.ttbutton = Button(self.fr,text = "Browse Time-table", command = self.load_tt)
-    self.ttbutton.pack(side="left")
-    self.rlbutton = Button(self.fr,text = "Browse Rooms-List", command = self.load_rl)
-    self.rlbutton.pack(side="left")
-    self.subbutton = Button(self.fr,text = "Submit", command = self.submit)
-    self.subbutton.pack(side="left")
-    self.back = Button(self.fr,text = "back", command = self.dest)
-    self.back.pack(side="left")
-    self.f1 = ""
-    self.rl = ""
-
-  def dest(self):
-    self.fr.destroy()
-    self.main2()
-  def delete(self):
-    self.g=0
-    self.frame.destroy()
-    self.parent.title("Delete " )
-    self.frame = Frame(self.parent)
-    self.frame1 = Frame(self.frame)
-    self.frame2 = Frame(self.frame)
-    self.frame3 = Frame(self.frame)
-    self.frame31= Frame(self.frame)
-    self.frame4 = Frame(self.frame)
-    self.frame5 = Frame(self.frame)
-    self.find_roll1 = Label(self.frame1, text ="Roll No.")
-    self.find_roll1.pack(expand=True,side=LEFT)
-    self.find_roll2 = Entry(self.frame1,bd=5)
-    self.find_roll2.pack(side=RIGHT)
-    self.find_ = Button(self.frame2,text = "Find",pady=10,command=self.find)
-    self.find_.pack(expand=True)
-    self.find_roll3 = Label(self.frame3, text ="Roll No. to be deleted")
-    self.find_roll3.pack(expand=True,side=LEFT)
-    self.find_roll4 = Entry(self.frame3,bd=5)
-    self.find_roll4.pack(side=RIGHT)
-    self.del2 = Button(self.frame4,text = "Delete Record",pady=10,command=self.del2)
-    self.del2.pack(expand=True)
-    self.sub = Button(self.frame5,text = "Back",pady=10,command=self.notifyMakeupExam)
-    self.sub.pack(expand=True)
-    self.frame.pack()
-    self.frame1.pack(side='top',fill='both',expand=True)
-    self.frame2.pack(side='top',fill='both',expand=True)
-    self.frame3.pack(side='top',fill='both',expand=True)
-    self.frame31.pack(side='top',fill='both',expand=True)
-    self.frame4.pack(side='top',fill='both',expand=True)
-    self.frame5.pack(side='top',fill='both',expand=True)
-
-  def del2(self):
-    client = MongoClient()
-    db = client.test
-    cursor = db.makeup.remove({'Roll_No':self.find_roll4.get()})
-
-  def find(self):
-    client = MongoClient()
-    db = client.test
-    cursor = db.makeup.find({'Roll_No':self.find_roll2.get()})
-    if self.g>0:
-      self.text.destroy()
-    for document in cursor:
-      self.g=1
-      self.text = Text(self.frame31)
-      self.text.insert(INSERT,"Name : %s Email ID : %s Roll No. : %s \n"% (document["Name"],document["Email_ID"],document["Roll_No"]))
-      self.text.pack()
-
-  def notifyMakeupExam(self):
-    self.frame.destroy()
-    self.parent.title("Makeup Manager " )
-    self.frame = Frame(self.parent)
-    self.frame1 = Frame(self.frame)
-    self.frame2 = Frame(self.frame)
-    self.frame3 = Frame(self.frame)
-    self.frame4 = Frame(self.frame)
-    self.frame5 = Frame(self.frame)
-
-    self.B = Button(self.frame1, text ="Notify Makeup",pady=10,command=self.notify)
-    self.B.pack(expand=True)
-    self.C = Button(self.frame2,text = "See list",pady=10,command=self.see_list)
-    self.C.pack(expand=True)
-    self.D = Button(self.frame3,text = "Add",pady=10,command=self.add)
-    self.D.pack(expand=True)
-    self.E = Button(self.frame4, text ="Delete",pady=10,command=self.delete)
-    self.E.pack(expand= True)
-    self.F = Button(self.frame5,text = "Back",pady=10,command = self.dest1)
-    self.F.pack(expand=True)
-    self.frame.pack()
-    self.frame1.pack(side='top',fill='both',expand=True)
-    self.frame2.pack(side='top',fill='both',expand=True)
-    self.frame3.pack(side='top',fill='both',expand=True)
-    self.frame4.pack(side='top',fill='both',expand=True)
-    self.frame5.pack(side='bottom',fill='both',expand=True)
-
-  def see_list(self):
-    self.frame.destroy()
-    self.parent.title("Makeup students " )
-    self.frame = Frame(self.parent)
-    client = MongoClient()
-    db = client.test
-    cursor = db.makeup.find()
-    text = Text(self.frame)
-    for document in cursor:
-      text.insert(INSERT,"Name : %s Email ID : %s Roll No. : %s \n"% (document["Name"],document["Email_ID"],document["Roll_No"]))
-      text.pack()
-    self.sub = Button(self.frame,text = "Back",pady=10,command=self.notifyMakeupExam)
-    self.sub.pack(expand=True)
-    self.frame.pack(side='top',fill='both',expand=True)
-
+class Notification:
+  def __init__(self):
+    x = 0
 
   def notify(self):
     client = MongoClient()
     db = client.test
-    cursor = db.makeup.find({},{'Email_ID':1,'_id':0,'Exam':1})
+    cursor = db.makeup.find({},{'Email_ID':1,'_id':0,'Exam':1,'Name':1})
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.ehlo()
     server.starttls()
@@ -328,40 +189,222 @@ class Example(Frame):
       msg = 'Subject: %s\n\n%s' % ("IMPORTANT", "Please contact your faculty ASAP. You have one make-up exam "+string1+" pending in our records.")
       server.sendmail("softtest360@gmail.com",document["Email_ID"], msg)
       print("DONE")
+      self.studentName = document["Name"]
       tkMessageBox.showinfo("Complete", "Notified %s"%(document["Email_ID"]))
     server.close()
+
+class UI(Frame):
+  def __init__(self,parent):
+    Frame.__init__(self,parent)
+    self.parent = parent
+    print "Inside Example __init__"
+    self.main2()
+#    self.initUI()
+
+  def initUI(self):
+    self.frame.destroy()
+    self.parent.title("Browse files " )
+    self.frame=Frame(self.parent)
+    fbg="white"
+    self.frame1 = Frame(self.frame,background=fbg)
+    self.frame2 = Frame(self.frame,background=fbg)
+    self.frame3 = Frame(self.frame,background=fbg)
+    self.frame4 = Frame(self.frame,background=fbg)
+
+    self.fileSelectLBL = Label(self, text = "Please select Time-table file : ")
+    self.fileSelectLBL.pack()
+    print "Creating button now"
+    abg="#f92727"
+    mybg="orange"
+    self.ttbutton = Button(self.frame1,text = "Browse Time-table", command = self.load_tt,width = 45,height = 5,activebackground=abg,bg=mybg,relief="groove")
+    self.ttbutton.pack(side="left",pady=5)
+    self.rlbutton = Button(self.frame2,text = "Browse Rooms-List", command = self.load_rl,width = 45,height = 5,activebackground=abg,bg=mybg,relief="groove")
+    self.rlbutton.pack(side="left",pady=5)
+    self.subbutton = Button(self.frame3,text = "Submit",pady=1, command = self.submit,width = 30,height = 5,activebackground=abg,bg=mybg,relief="groove")
+    self.subbutton.pack(side="left",pady=25)
+    self.back = Button(self.frame3,text = "Back", command = self.dest,width = 10,height = 3,activebackground=abg,bg=mybg,relief="groove")
+    self.back.pack(side="bottom",pady=25)
+    self.f1 = ""
+    self.rl = ""
+    self.frame.pack()
+    self.frame1.pack(side='top',fill='both',expand=True)
+    self.frame2.pack(side='top',fill='both',expand=True)
+    self.frame3.pack(side='top',fill='both',expand=True)
+    self.frame4.pack(side='bottom',fill='both',expand=True)
+
+  def dest(self):
+    self.frame.destroy()
+    self.main2()
+
+  def delete(self):
+    abg = "#f92727"
+    mybg="orange"
+    fbg="white"
+    self.g=0
+    self.frame.destroy()
+    self.initial=1
+    self.parent.title("Exam Management Software " )
+    self.frame = Frame(self.parent)
+    self.frame1 = Frame(self.frame,background=fbg)
+    self.frame2 = Frame(self.frame,background=fbg)
+    self.frame3 = Frame(self.frame,background=fbg)
+    self.frame31= Frame(self.frame,background=fbg)
+    self.frame4 = Frame(self.frame,background=fbg)
+    self.frame5 = Frame(self.frame,background=fbg)
+    if(self.initial==1):
+      self.find_roll1 = Label(self.frame1, text ="Roll No.",background = fbg)
+      self.find_roll1.pack(expand=True,side=LEFT)
+      self.find_roll2 = Entry(self.frame1,bd=5)
+      self.find_roll2.pack(side=RIGHT)
+      self.find_ = Button(self.frame2,text = "Find",pady=10,command=self.find,width = 10,height = 1,activebackground=abg,bg=mybg,relief="groove")
+      self.find_.pack(expand=True,pady=5)
+    self.sub = Button(self.frame5,text = "Back",pady=10,command=self.notifyMakeupExam,width = 8,height = 1,activebackground=abg,bg=mybg,relief="groove")
+    self.sub.pack(expand=True,pady=8)
+    self.frame.pack()
+    self.frame1.pack(side='top',fill='both',expand=True)
+    self.frame2.pack(side='top',fill='both',expand=True)
+    self.frame3.pack(side='top',fill='both',expand=True)
+    self.frame31.pack(side='top',fill='both',expand=True)
+    self.frame4.pack(side='top',fill='both',expand=True)
+    self.frame5.pack(side='top',fill='both',expand=True)
+
+  def del2(self):
+    print("HERE2")
+    client = MongoClient()
+    db = client.test
+    succ=0
+    print(len(self.c))
+    for i in range (len(self.c)):
+      print(self.c[i].cget("text"))
+      if self.checkvar[i].get()==1:
+        if((db.makeup.find({'Roll_No':self.find_roll2.get(),'Exam':self.c[i].cget("text")})).count!=0):
+          tkMessageBox.showinfo("Success", "Removed entry/entries.")
+          succ=1
+        cursor = db.makeup.remove({'Roll_No':self.find_roll2.get(),'Exam':self.c[i].cget("text")})
+    if(succ==0):
+      tkMessageBox.showinfo("Error", "Could not delete any record!")
+    self.dest3()
+       
+
+  def find(self):
+    self.checkvar=[]
+    self.c=[]
+    self.initial=1
+    fbg="white"
+    mybg="orange"
+    abg="#f92727"
+    client = MongoClient()
+    db = client.test
+    cursor = db.makeup.find({'Roll_No':self.find_roll2.get()})
+    #if self.g>0:
+    #  self.text.destroy()
+    #self.text = Text(self.frame31,height=15,width=85)
+    self.ij=0
+    for document in cursor:
+      self.g=1
+      self.checkvar.append(IntVar())
+      self.c.append(Checkbutton(self.frame31, text = "%s"%(document["Exam"]) , variable = self.checkvar[self.ij], \
+                 onvalue = 1, offvalue = 0, height=5, \
+                 width = 50))
+      self.c[self.ij].pack()
+      self.ij=self.ij+1
+      #self.text.insert(INSERT,"Name : %s Email ID : %s Roll No. : %s Exam : %s \n"% (document["Name"],document["Email_ID"],document["Roll_No"],document["Exam"]))
+      #self.text.pack()
+    #if(self.initial==1):
+     # self.find_roll3 = Label(self.frame3, text ="Roll No. to be deleted",background=fbg)
+      #self.find_roll3.pack(expand=True,side=LEFT)
+      
+      #self.find_roll4 = Entry(self.frame3,bd=5)
+      #self.find_roll4.pack(side=RIGHT)
+    print("HERE")
+    self.del21 = Button(self.frame4,text = "Delete Record",pady=10,command=self.del2,width = 18,height= 1,activebackground=abg,bg=mybg,relief="groove")
+    self.del21.pack(expand=True)
+    self.initial=0
+
+  def notifyMakeupExam(self):
+    self.frame.destroy()
+    self.parent.title("Makeup Manager " )
+    abg = "#f92727"
+    mybg="orange"
+    fbg="white"
+    self.frame = Frame(self.parent,background=fbg)
+    self.frame1 = Frame(self.frame,background=fbg,highlightthickness=3,highlightbackground="#f93503")
+    self.frame2 = Frame(self.frame,background=fbg,highlightthickness=3,highlightbackground="#f93503")
+    self.frame3 = Frame(self.frame,background=fbg)
+    self.frame4 = Frame(self.frame,background=fbg)
+    self.frame5 = Frame(self.frame,background=fbg)
+    notification = Notification()
+    self.B = Button(self.frame1, text ="Notify About Makeup Exam",pady=5,command=notification.notify,width = 30,height = 3,activebackground=abg,bg=mybg,relief="groove")
+    self.B.pack(expand=True,pady=5,side="top")
+    self.C = Button(self.frame1,text = "See list of Makeup Exams",pady=5,command=self.see_list,width = 30,height = 3,activebackground=abg,bg=mybg,relief="groove")
+    self.C.pack(expand=True,pady=5,side="bottom")
+    self.D = Button(self.frame2,text = "Add Makeup Record",pady=5,command=self.add,width = 30,height = 3,activebackground=abg,bg=mybg,relief="groove")
+    self.D.pack(expand=True,pady=5,side="top")
+    self.initial=1
+    self.E = Button(self.frame2, text ="Delete Record",pady=5,command=self.delete,width = 30,height = 3,activebackground=abg,bg=mybg,relief="groove")
+    self.E.pack(expand= True,pady=5,side="bottom")
+    self.F = Button(self.frame5,text = "Back",pady=5,command = self.dest1,width = 20,height = 2,activebackground=abg,bg=mybg,relief="groove")
+    self.F.pack(expand=True,pady=10,side="bottom")
+    #self.F.place(x = 50, y = 100, width=10, height=5)
+    self.frame.pack()
+    self.frame1.pack(side='top',fill='both',expand=True,ipadx=12)
+    self.frame2.pack(side='top',fill='both',expand=True,pady=10)
+    self.frame3.pack(side='top',fill='both',expand=True)
+    self.frame4.pack(side='top',fill='both',expand=True)
+    self.frame5.pack(side='bottom',fill='both',expand=True)
+
+  def see_list(self):
+    abg="#f92727"
+    mybg="orange"
+    self.frame.destroy()
+    self.parent.title("Makeup students " )
+    self.frame = Frame(self.parent,background="white")
+    client = MongoClient()
+    db = client.test
+    cursor = db.makeup.find()
+    text = Text(self.frame,width=100)
+    for document in cursor:
+      text.insert(INSERT,"Name : %s Email ID : %s Roll No. : %s Exam : %s \n"% (document["Name"],document["Email_ID"],document["Roll_No"],document["Exam"]))
+      text.pack()
+    self.sub = Button(self.frame,text = "Back",pady=10,command=self.notifyMakeupExam,width = 10,activebackground=abg,bg=mybg,relief="groove")
+    self.sub.pack(expand=True)
+    self.frame.pack(side='top',fill='both',expand=True)
+
 
   def add(self):
     self.frame.destroy()
     self.parent.title("Makeup Manager " )
     self.frame = Frame(self.parent)
-    self.frame1 = Frame(self.frame)
-    self.frame2 = Frame(self.frame)
-    self.frame3 = Frame(self.frame)
-    self.frame4 = Frame(self.frame)
-    self.frame5 = Frame(self.frame)
-    self.frame6 = Frame(self.frame)
+    fbg= "white"
+    abg="#f92727"
+    mybg="orange"
+    self.frame1 = Frame(self.frame,background=fbg)
+    self.frame2 = Frame(self.frame,background=fbg)
+    self.frame3 = Frame(self.frame,background=fbg)
+    self.frame4 = Frame(self.frame,background=fbg)
+    self.frame5 = Frame(self.frame,background=fbg)
+    self.frame6 = Frame(self.frame,background=fbg)
 
-    self.B1 = Label(self.frame1, text ="Name")
+    self.B1 = Label(self.frame1, text ="Name",bg=fbg)
     self.B1.pack(expand=True,side=LEFT)
     self.B2 = Entry(self.frame1,bd=5)
     self.B2.pack(side=RIGHT)
-    self.C1 = Label(self.frame2, text ="Roll Number")
+    self.C1 = Label(self.frame2, text ="Roll Number",bg=fbg)
     self.C1.pack(expand=True,side=LEFT)
     self.C2 = Entry(self.frame2,bd=5)
     self.C2.pack(side=RIGHT)
-    self.D1 = Label(self.frame3, text ="Email ID")
+    self.D1 = Label(self.frame3, text ="Email ID",bg=fbg)
     self.D1.pack(expand=True,side=LEFT)
     self.D2 = Entry(self.frame3,bd=5)
     self.D2.pack(side=RIGHT)
-    self.E1 = Label(self.frame4, text ="Exam-Name")
+    self.E1 = Label(self.frame4, text ="Exam-Name",bg=fbg)
     self.E1.pack(expand=True,side=LEFT)
     self.E2 = Entry(self.frame4,bd=5)
     self.E2.pack(side=RIGHT)
-    self.sub = Button(self.frame5,text = "Submit",pady=10,command=self.printing)
-    self.sub.pack(expand=True)
-    self.sub = Button(self.frame6,text = "Back",pady=10,command=self.notifyMakeupExam)
-    self.sub.pack(expand=True)
+    self.sub = Button(self.frame5,text = "Submit",pady=10,command=self.addMakeup,width = 10,activebackground=abg,bg=mybg,relief="groove")
+    self.sub.pack(expand=True,pady=5)
+    self.sub = Button(self.frame6,text = "Back",pady=10,command=self.notifyMakeupExam,width = 10,activebackground=abg,bg=mybg,relief="groove")
+    self.sub.pack(expand=True,pady=10)
     self.frame.pack()
     self.frame1.pack(side='top',fill='both',expand=True)
     self.frame2.pack(side='top',fill='both',expand=True)
@@ -370,83 +413,116 @@ class Example(Frame):
     self.frame5.pack(side='top',fill='both',expand=True)
     self.frame6.pack(side='top',fill='both',expand=True)
 
-  def printing(self):
+  def addMakeup(self):
     client = MongoClient()
     db = client.test
-    if not self.B2.get() or not self.C2.get() or not self.D2.get() or not self.E2.get() : 
-      tkMessageBox.showinfo("Enter Again")
+    EMAIL_REGEX = re.compile(r"^[A-Za-z0-9\.\+_-]+@[A-Za-z0-9\._-]+\.[a-zA-Z]*$")
+    if not self.B2.get() or not self.C2.get() or not self.D2.get() or not self.E2.get()  : 
+      tkMessageBox.showinfo("Enter Again","Some fields were empty")
+      self.add() 
+    elif not EMAIL_REGEX.match(self.D2.get()):
+      tkMessageBox.showinfo("Enter Again","Invalid E-Mail address")
       self.add() 
     else :
       result = db.makeup.insert_one({'Name':self.B2.get(),'Roll_No':self.C2.get(),'Email_ID':self.D2.get(),'Exam':self.E2.get()})
-      self.add()
+      tkMessageBox.showinfo("Success", "Added entry.")
+      self.dest3()
+
+
+  def dest3(self):
+    self.frame.destroy()
+    self.frame1.destroy()
+    self.notifyMakeupExam()
 
   def main2(self):
-    self.parent.title("Main Page " )
-    self.frame = Frame(self.parent)
-    self.frame1 = Frame(self.frame)
-    self.frame2 = Frame(self.frame)
-    self.frame3 = Frame(self.frame)
-    self.frame4 = Frame(self.frame)
-
-    self.B = Button(self.frame1, text ="Mail GuideLines",pady=10,command=self.mailing)
-    self.B.pack(expand=True)
-    self.C = Button(self.frame2,text = "Generate Seting Plan",pady=10,command=self.initUI)
-    self.C.pack(expand=True)
-    self.D = Button(self.frame3,text = "Makeup Manager",pady=10,command=self.notifyMakeupExam)
-    self.D.pack(expand=True)
-    self.E = Button(self.frame4, text ="Help",pady=10,command=self.help)
-    self.E.pack(expand= True)
+    self.parent.title("Exam Management Software " )
+    fbg = "white"
+    self.frame = Frame(self.parent,background=fbg)
+    self.frame1 = Frame(self.frame,background=fbg)
+    self.frame2 = Frame(self.frame,background=fbg)
+    self.frame3 = Frame(self.frame,background=fbg)
+    self.frame4 = Frame(self.frame,background=fbg)
+    abg = "#f92727"
+    mybg="orange"
+    self.B = Button(self.frame1, text ="Mail GuideLines",pady=10,command=self.sendExamGuidelines,width = 40,height = 4,activebackground=abg,bg=mybg,relief="sunken")
+    self.C = Button(self.frame2,text = "Generate Seating Plan",pady=10,command=self.initUI,width = 40,height = 4,activebackground=abg,bg=mybg,relief="groove")
+    self.C.pack(expand=True,pady = 4)
+    self.B.pack(expand=True,pady=4)
+    self.D = Button(self.frame3,text = "Makeup Manager",pady=10,command=self.notifyMakeupExam,width = 40,height = 4,activebackground=abg,bg=mybg,relief="groove")
+    self.D.pack(expand=True,pady=4)
+    self.E = Button(self.frame4, text ="Help",pady=10,command=self.help,width = 40,height = 3,activebackground=abg,bg=mybg,relief="sunken")
+    self.E.pack(expand= True,pady=4)
     self.frame.pack()
-    self.frame1.pack(side='top',fill='both',expand=True)
     self.frame2.pack(side='top',fill='both',expand=True)
+    self.frame1.pack(side='top',fill='both',expand=True)
     self.frame3.pack(side='top',fill='both',expand=True)
     self.frame4.pack(side='bottom',fill='both',expand=True)
 
   def help(self):
     system("libreoffice "+"/home/vijay_paliwal/Codes/python/Project/examhelp.pdf")
  
-  def mailing(self):
+  def sendExamGuidelines(self):
     self.frame.destroy()
     self.parent.title("Mailing Guidelines " )
-    self.frame = Frame(self.parent)
-    self.mail = Button(self.frame,text = "Mail Guidelines",pady=10,command=self.mailing2)
-    self.mail.pack(expand=True)
-    self.back = Button(self.frame,text = "Back",pady=10,command=self.dest1)
-    self.back.pack(expand=True)
+    self.customFont = tkFont.Font(family="Helvetica", size=18)
+    abg = "#f92727"
+    mybg="orange"
+    self.frame = Frame(self.parent,background="white")
+    self.frame1 = Frame(self.frame,background="white")
+    self.guideFile=""
+    self.label = Label(self.frame,text = "Please select the guidelines file to be sent to all students.",font=self.customFont,background="white")
+    self.label.pack(expand=True,pady=10)
+    self.mail1 = Button(self.frame,text = "Browse the guidelines file",pady=10,command=self.browsePdf,width = 40,height = 4,activebackground=abg,bg=mybg,relief="groove")
+    self.mail1.pack(expand=True,pady=10)
+    self.mail = Button(self.frame,text = "Mail Guidelines",pady=10,command=self.mail,width = 40,height = 4,activebackground=abg,bg=mybg,relief="groove")
+    self.mail.pack(expand=True,pady=10)
+    self.back = Button(self.frame1,text = "Back",pady=10,command=self.dest1,width = 20,height = 2,activebackground=abg,bg=mybg,relief="groove")
+    self.back.pack(expand=True,pady=40,side="left")
     self.frame.pack()
+    self.frame1.pack()
 
   def dest1(self):
     self.frame.destroy()
+    self.frame1.destroy()
     self.main2()
+
+  def browsePdf(self):
+    ftypes = [("PDF Files","*.pdf")]
+    self.guideFile = askopenfilename(filetypes = ftypes)    
     
-  def mailing2(self):
-    self.msg = MIMEMultipart()
-    self.msg['Subject'] = 'Email From Python'
-    self.msg['From'] = 'softtest360@gmail.com'
-    #msg['Reply-to'] = 'otroemail@dominio'
-    self.msg['To'] = 'paliwal.2@iitj.ac.in'
+  def mail(self):
+    if(self.guideFile==""):
+      tkMessageBox.showinfo("Error", "Please select guidelines file")
+    else:
+      self.msg = MIMEMultipart()
+      self.msg['Subject'] = 'Important: Exam Guiedlines'
+      self.msg['From'] = 'softtest360@gmail.com'
+      #msg['Reply-to'] = 'otroemail@dominio'
+      self.msg['To'] = 'paliwal.2@iitj.ac.in'
  
-    # That is what u see if dont have an email reader:
-    self.msg.preamble = 'Multipart massage.\n'
+      # That is what u see if dont have an email reader:
+      self.msg.preamble = 'Multipart massage.\n'
  
-    # This is the textual part:
-    self.part = MIMEText("Hello im sending an email from a python program")
-    self.msg.attach(self.part)
+      # This is the textual part:
+      self.part = MIMEText("Please find attched guidelines for exams.")
+      self.msg.attach(self.part)
  
-    # This is the binary part(The Attachment):
-    self.part = MIMEApplication(open('a.pdf','rb').read())
-    self.part.add_header('Content-Disposition', 'attachment', filename='a.pdf')
-    self.msg.attach(self.part)
+      # This is the binary part(The Attachment):
+      self.part = MIMEApplication(open(self.guideFile,'rb').read())
+      self.part.add_header('Content-Disposition', 'attachment', filename=self.guideFile)
+      self.msg.attach(self.part)
  
-    # Create an instance in SMTP server
-    self.server = SMTP("smtp.gmail.com",587)
-    # Start the server:
-    self.server.ehlo()
-    self.server.starttls()
-    self.server.login("softtest360@gmail.com", "exammanage")
+      # Create an instance in SMTP server
+      self.server = SMTP("smtp.gmail.com",587)
+      # Start the server:
+      self.server.ehlo()
+      self.server.starttls()
+      self.server.login("softtest360@gmail.com", "exammanage")
  
     # Send the email
-    self.server.sendmail(self.msg['From'], self.msg['To'], self.msg.as_string())
+      self.server.sendmail(self.msg['From'], self.msg['To'], self.msg.as_string())
+      tkMessageBox.showinfo("Success", "Guidelines have been successfully mailed.")
+      self.dest1()
 
 
   def load_tt(self, ftypes = None):
@@ -481,19 +557,23 @@ class Example(Frame):
       self.tt.readTimeTable(ttFile = self.f1)
       self.tt.readRoomList(rlFile = self.rl)
       validity = self.tt.verifyTimeTable()
-      self.fr.destroy()
+      self.frame.destroy()
       self.parent.title("Some more files please: " )
-      self.frame = Frame(self.parent)
-      self.B = Button(self.frame, text ="Browse Students List File: ",pady=10,command = self.load_studFile)
-      self.C = Button(self.frame, text ="Browse Instructors List ",pady=10,command = self.load_instrFile)
-      self.D = Button(self.frame, text ="Browse Output Destination",pady=10,command = self.load_output)
-      self.E = Button(self.frame, text ="Submit", pady=10,command = self.generateAll)
-      self.F = Button(self.frame, text ="Back to Home",pady=10,command=self.dest1)
-      self.B.pack(expand=True)
-      self.C.pack(expand=True)
-      self.D.pack(expand=True)
-      self.E.pack(expand=True)
-      self.F.pack(expand=True)
+      fbg="white"
+      abg="#f92727"
+      mybg="orange"
+      self.out_path=""
+      self.frame = Frame(self.parent,background = fbg)
+      self.B = Button(self.frame, text ="Browse Students List File: ",pady=10,command = self.load_studFile,width = 40,height = 1,activebackground=abg,bg=mybg,relief="groove")
+      self.C = Button(self.frame, text ="Browse Instructors List ",pady=10,command = self.load_instrFile,width = 40,height = 1,activebackground=abg,bg=mybg,relief="groove")
+      self.D = Button(self.frame, text ="Browse Output Destination",pady=10,command = self.load_output,width = 40,height = 1,activebackground=abg,bg=mybg,relief="groove")
+      self.E = Button(self.frame, text ="Submit", pady=10,command = self.generateAll,width = 25,height = 1,activebackground=abg,bg=mybg,relief="groove")
+      self.F = Button(self.frame, text ="Back to Home",pady=10,command=self.dest1,width = 15,height = 1,activebackground=abg,bg=mybg,relief="groove")
+      self.B.pack(expand=True,pady=3)
+      self.C.pack(expand=True,pady=3)
+      self.D.pack(expand=True,pady=3)
+      self.E.pack(expand=True,pady=10)
+      self.F.pack(expand=True,pady=30)
       self.frame.pack()
     self.studFile = ""
     self.instrFile = ""
@@ -503,51 +583,54 @@ class Example(Frame):
     print self.studFile
     print self.instrFile
     print self.out_path
-    self.studBook  = load_workbook(self.studFile)
-    self.studSheet = self.studBook.active
-    self.noStudents = self.studSheet['A1'].value
-    i = 0
-    self.studentList = []
-    self.courses = []
-    curr=1
-    for i in range (0,self.noStudents):
-      curr=curr+1
-      rowNo = str(curr)
-      self.name = self.studSheet['A'+rowNo].value
-      self.rollNo = self.studSheet['B'+rowNo].value
-      self.email = self.studSheet['C'+rowNo].value
-      self.noOfCourses = self.studSheet['D'+rowNo].value
-      j = 0
-      self.courseList = []
-      for j in range (0,self.noOfCourses):
-        curr = curr+1
+    if ((self.studFile=="") or (self.instrFile=="") or (self.out_path=="")):
+      tkMessageBox.showinfo("Error", "Please Provide all inputs")
+    else:
+      self.studBook  = load_workbook(self.studFile)
+      self.studSheet = self.studBook.active
+      self.noStudents = self.studSheet['A1'].value
+      i = 0
+      self.studentList = []
+      self.courses = []
+      curr=1
+      for i in range (0,self.noStudents):
+        curr=curr+1
         rowNo = str(curr)
-        self.courseList.append(self.studSheet['A'+rowNo].value)
-        found = 0
-        self.corCode = self.studSheet['A'+rowNo].value
-        self.corValue = self.studSheet['B'+rowNo].value
-        for self.item in self.courses:
-          if (self.item.courseCode == self.corCode):
-            found = 1
-            self.item.studentList.append(self.rollNo)
-            self.item.noOfStudents = self.item.noOfStudents+1
-        if (found == 0):
-          self.courses.append(Course(courseCode = self.corCode,courseTitle = self.corValue,studentList = [self.rollNo],noOfStudents=1))
-        found = 0
-      self.student = Student(name = self.name,rollNo = self.rollNo,email=self.email,courseList = self.courseList)
-      self.studentList.append(self.student)
-      stud = None
-    for stud in self.studentList:
-      print stud.name,stud.rollNo,stud.email
-      for self.course in stud.courseList:
-        print self.course
-    stri = None
-    for stud in self.courses:
-      print stud.courseCode,stud.courseTitle,stud.noOfStudents
-      for stri in stud.studentList:
-        print stri
-    self.generateSeatingArrangement();
-    return 0
+        self.name = self.studSheet['A'+rowNo].value
+        self.rollNo = self.studSheet['B'+rowNo].value
+        self.email = self.studSheet['C'+rowNo].value
+        self.noOfCourses = self.studSheet['D'+rowNo].value
+        j = 0
+        self.courseList = []
+        for j in range (0,self.noOfCourses):
+          curr = curr+1
+          rowNo = str(curr)
+          self.courseList.append(self.studSheet['A'+rowNo].value)
+          found = 0
+          self.corCode = self.studSheet['A'+rowNo].value
+          self.corValue = self.studSheet['B'+rowNo].value
+          for self.item in self.courses:
+            if (self.item.courseCode == self.corCode):
+              found = 1
+              self.item.studentList.append(self.rollNo)
+              self.item.noOfStudents = self.item.noOfStudents+1
+          if (found == 0):
+            self.courses.append(Course(courseCode = self.corCode,courseTitle = self.corValue,studentList = [self.rollNo],noOfStudents=1))
+          found = 0
+        self.student = Student(name = self.name,rollNo = self.rollNo,email=self.email,courseList = self.courseList)
+        self.studentList.append(self.student)
+        stud = None
+      for stud in self.studentList:
+        print stud.name,stud.rollNo,stud.email
+        for self.course in stud.courseList:
+          print self.course
+      stri = None
+      for stud in self.courses:
+        print stud.courseCode,stud.courseTitle,stud.noOfStudents
+        for stri in stud.studentList:
+          print stri
+      self.generateSeatingArrangement();
+      return 0
 
   def generateSeatingArrangement(self):
     stud = None
@@ -689,12 +772,48 @@ class Example(Frame):
     self.examList.append(self.exam)
     self.prevTime = self.exam.examTime
     for self.sa in self.salist:
-      try:
-        self.path = self.out_path
-        self.path = self.path+"/SA_"+self.sa.time
-        mkdir(self.path,0744)
-      except OSError:
-        pass
+      self.instBook = load_workbook(self.instrFile)
+      self.instSheet = self.instBook.active
+      self.noOfInvigilators = self.instSheet['A1'].value
+      self.invigList=[]
+      self.allocList=[]
+      variable=0
+      for variable in range(0,self.noOfInvigilators):
+        self.invigList.append(self.instSheet['A'+str(variable+2)].value)
+        self.allocList.append(0)
+      self.avgSize = int(self.noOfInvigilators/len(self.sa.roomList))
+      if(self.avgSize>=2):
+        self.avgSize = 2
+      if(self.avgSize<1):
+        tkMessageBox.showinfo("Error", "Insufficient no. of invigilators. Please update the Invigilators list file")
+      else:
+        i = 0
+        p=0
+        invigwb = Workbook()
+        invigws = invigwb.active
+        invigws['A1'] = "Invigilator Duty for "+self.sa.time
+        rowNo = 2
+        listAlpha = ['B','C']
+        for p in range(0,len(self.sa.roomList)):
+          self.l1=[]
+          print self.avgSize
+          invigws['A'+str(rowNo)] = self.sa.roomList[p].roomNo
+          for i in range(0,self.avgSize):
+            k = random.randint(0,self.noOfInvigilators-1)
+            while (self.allocList[k]==1):
+              k = random.randint(0,self.noOfInvigilators-1)
+            invigws[listAlpha[i]+str(rowNo)] = self.invigList[k]
+            print self.invigList[k],k
+            self.allocList[k] = 1
+          rowNo = rowNo + 1
+      
+        try:
+          self.path = self.out_path
+          self.path = self.path+"/SA_"+self.sa.time
+          mkdir(self.path,0744)
+        except OSError:
+          pass
+        invigwb.save(self.path+"/Invigilator_duty.xlsx")
       listAlpha = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']   #Limits no. of columns to 26
       self.examList = []
       for self.exam in self.tt.examList:
@@ -781,30 +900,22 @@ class Example(Frame):
           print self.att.courseCode
           for self.sRoll in self.att.studentList:
             print self.sRoll
-
-
-    #for self.sa in self.salist:
-    #  print self.sa.time
-    #  for self.room in self.sa.roomList:
-    #    for self.row1 in self.room.studentList:
-    #      print "List"
-    #      for self.student in self.row1:
-    #       print self.student
-    #
-    #for self.course in self.courses:
-    #  for self.room in self.roomList:
+    tkMessageBox.showinfo("Success", "All Ouptput files are generated in "+self.out_path+" folder.")
+    self.dest1()
 
 def main(): 
   window = Tk()
+  canvas = Canvas(width = 200, height = 170, bg = 'blue')
+  canvas.pack(expand = NO, fill = BOTH)
+
+  image = ImageTk.PhotoImage(file = "BG.png")
+  canvas.create_image(0, 0, image = image, anchor = NW)
   print "inside main"
-  ex = Example(window)
-  window.geometry("500x400")
+  uiObject = UI(window)
+  fbg="white"
+  window.configure(background=fbg)
+  window.geometry("800x600")
   window.title("Exam Management Software")
-  
-  #i1 = Invigilator(name= "Vijay", email = "paliwal.2@iitj.ac.in",noOfExams = 2 , courses = ["Physics","Maths","COA"])
-  #i2 = Invigilator(name = "Dinesh")
-  #print i1.name," ",i1.email," ",i1.noOfExams," ",i1.courses;
-  #print i2.name," ",i2.email," ",i2.noOfExams," ",i2.courses;
   window.mainloop()
 
 main()
