@@ -16,6 +16,7 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from smtplib import SMTP
 from os import system
+from os import popen
 import random
 from PIL import ImageTk
 import tkFont
@@ -424,7 +425,7 @@ class UI(Frame):
       tkMessageBox.showinfo("Enter Again","Invalid E-Mail address")
       self.add() 
     else :
-      result = db.makeup.insert_one({'Name':self.B2.get(),'Roll_No':self.C2.get(),'Email_ID':self.D2.get(),'Exam':self.E2.get()})
+      result = db.makeup.insert({'Name':self.B2.get(),'Roll_No':self.C2.get(),'Email_ID':self.D2.get(),'Exam':self.E2.get()})
       tkMessageBox.showinfo("Success", "Added entry.")
       self.dest3()
 
@@ -459,8 +460,8 @@ class UI(Frame):
     self.frame4.pack(side='bottom',fill='both',expand=True)
 
   def help(self):
-    system("libreoffice "+"/home/vijay_paliwal/Codes/python/Project/examhelp.pdf")
- 
+    popen("evince file:"+"/home/vijay/Codes/Python/"+"examhelp.pdf")
+
   def sendExamGuidelines(self):
     self.frame.destroy()
     self.parent.title("Mailing Guidelines " )
