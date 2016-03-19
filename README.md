@@ -6,7 +6,7 @@ Guys here we present a complete exam management software. It can simply be insta
 
 1. Install Tkinter:
 
-$ sudo apt-get install python-tk
+ $ sudo apt-get install python-tk
 
 
 2. Installing openpyxl:
