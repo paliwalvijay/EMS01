@@ -11,13 +11,13 @@ $ sudo apt-get install python-tk
 
 2. Installing openpyxl:
 
-First install the 'jdcal' package bt the following command:
+   First install the 'jdcal' package bt the following command:
 
    $ sudo pip install jdcal
 
-Download openpyxl package from https://pypi.python.org/packages/source/o/openpyxl/openpyxl-2.3.4.tar.gz (Simply paste the url in your browser.) Save the file in Downloads folder.
+  Download openpyxl package from https://pypi.python.org/packages/source/o/openpyxl/openpyxl-2.3.4.tar.gz (Simply paste the url   in your browser.) Save the file in Downloads folder.
 
-Now open terminal and type
+  Now open terminal and type
 
  $ cd ~/Downloads
 
@@ -30,21 +30,21 @@ Now open terminal and type
 
 3. Install MongoDB:
 
- 1. $ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+   1. $ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
 
- 2. $ echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | sudo tee /etc/apt/sources.list.d/mongodb.list
+   2. $ echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | sudo tee /etc/apt/sources.list.d/mongodb.list
 
- 3. $ sudo apt-get update
+   3. $ sudo apt-get update
 
- 4. $ sudo apt-get install -y mongodb-org
+   4. $ sudo apt-get install -y mongodb-org
 
 
 
 4. Install pymongo:
- $ sudo apt-get install python-pymongo
+   $ sudo apt-get install python-pymongo
 
 5. Install Image-Tk:
- $ sudo apt-get install python-imaging-tk
+   $ sudo apt-get install python-imaging-tk
 
 Download the source code file home.py.
 Also download the image BG.png and examhelp.pdf and keep them in same directory as of home.py.
@@ -58,3 +58,4 @@ Then execute the python code by the command: $  python home.py
 Hope you will enjoy it!!! :)
 
 --Den
+********
