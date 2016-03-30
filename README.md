@@ -54,7 +54,7 @@ You can even download sample input files for the softwares from the same reposit
 
 Configuring for your pc:
 
-Go to line number 463 in file home.py and replace "/home/vijay/Codes/Python/" by the directory address where home.py and examhelp.pdf are located.
+Go to line number 480 in file home.py and replace "/home/vijay/Codes/Python/" by the directory address where home.py and examhelp.pdf are located.
 
 Then execute the python code by the command: $  python home.py
 
