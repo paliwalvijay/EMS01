@@ -444,7 +444,7 @@ class UI(Frame):
         result = db.makeup.insert({'Name':self.B2.get(),'Roll_No':self.C2.get().upper(),'Email_ID':self.D2.get(),'Exam':self.E2.get()})
         tkMessageBox.showinfo("Success", "Added entry.")
         self.dest3()
-      else:
+      elif cursor.count()!=0 :
         tkMessageBox.showinfo("Enter Again","Redundant entry")
         self.add()
 
