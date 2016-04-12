@@ -19,6 +19,7 @@ from os import system
 from os import popen
 import random
 from PIL import ImageTk
+from PIL import Image
 import tkFont
 import re
 
@@ -432,19 +433,31 @@ class UI(Frame):
     elif not EMAIL_REGEX.match(self.D2.get()):
       tkMessageBox.showinfo("Enter Again","Invalid E-Mail address")
       self.add()
-    elif cursor2.count>0:
+    elif (cursor2.count())>0:
+      self.gotIt = 0
       for docs in cursor2:
         if(docs["Name"]!=self.B2.get()):
           tkMessageBox.showinfo("Enter Again","Roll Number doesnt matched with the Name in the database")
           self.add()
-    else :
-      if cursor.count()!=1:
+          self.gotIt = 1
+      if self.gotIt==0 and cursor.count()==0:
         result = db.makeup.insert({'Name':self.B2.get(),'Roll_No':self.C2.get().upper(),'Email_ID':self.D2.get(),'Exam':self.E2.get()})
         tkMessageBox.showinfo("Success", "Added entry.")
         self.dest3()
       else:
         tkMessageBox.showinfo("Enter Again","Redundant entry")
         self.add()
+
+    else :
+      if cursor.count()!=1:
+        #print self.B2.get(),self.C2.get(),self.D2.get(),self.E2.get()
+        result = db.makeup.insert({'Name':self.B2.get(),'Roll_No':self.C2.get().upper(),'Email_ID':self.D2.get(),'Exam':self.E2.get()})
+        tkMessageBox.showinfo("Success", "Added entry.")
+        self.dest3()
+      else:
+        tkMessageBox.showinfo("Enter Again","Redundant entry")
+        self.add()
+
 
 
   def dest3(self):
@@ -477,7 +490,7 @@ class UI(Frame):
     self.frame4.pack(side='bottom',fill='both',expand=True)
 
   def help(self):
-    popen("evince file:"+"/home/vijay/Codes/Python/"+"examhelp.pdf")
+    popen("evince file:"+"examhelp.pdf")
 
   def sendExamGuidelines(self):
     self.frame.destroy()
@@ -572,9 +585,24 @@ class UI(Frame):
     else :
      # lbl.config(text="Getting data")
       self.tt = TimeTable()
-      self.tt.readTimeTable(ttFile = self.f1)
-      self.tt.readRoomList(rlFile = self.rl)
-      validity = self.tt.verifyTimeTable()
+      try:
+        self.tt.readTimeTable(ttFile = self.f1)
+      except:
+        tkMessageBox.showinfo("Error", "Invalid Time-table file format!")
+	return 0
+      try:
+        self.tt.readRoomList(rlFile = self.rl)
+      except:
+        tkMessageBox.showinfo("Error", "Invalid rooms list file format!")
+        return 0
+      try:
+        validity = self.tt.verifyTimeTable()
+      except:
+        tkMessageBox.showinfo("Error", "Unable to verify time-table! File-formats or entries may be incorrect!")
+        return 0
+      if validity==0 :
+        tkMessageBox.showinfo("Sorry", "Time-table is not valid! The rooms capacity is less than the total no of students for exam in a slot!        PLEASE GIVE CORRECT TIME-TABLE")
+        return 0
       self.frame.destroy()
       self.parent.title("Some more files please: " )
       fbg="white"
@@ -598,57 +626,60 @@ class UI(Frame):
     print "Got !"
 
   def generateAll(self):
-    print self.studFile
-    print self.instrFile
-    print self.out_path
-    if ((self.studFile=="") or (self.instrFile=="") or (self.out_path=="")):
-      tkMessageBox.showinfo("Error", "Please Provide all inputs")
-    else:
-      self.studBook  = load_workbook(self.studFile)
-      self.studSheet = self.studBook.active
-      self.noStudents = self.studSheet['A1'].value
-      i = 0
-      self.studentList = []
-      self.courses = []
-      curr=1
-      for i in range (0,self.noStudents):
-        curr=curr+1
-        rowNo = str(curr)
-        self.name = self.studSheet['A'+rowNo].value
-        self.rollNo = self.studSheet['B'+rowNo].value
-        self.email = self.studSheet['C'+rowNo].value
-        self.noOfCourses = self.studSheet['D'+rowNo].value
-        j = 0
-        self.courseList = []
-        for j in range (0,self.noOfCourses):
-          curr = curr+1
+    try:
+      print self.studFile
+      print self.instrFile
+      print self.out_path
+      if ((self.studFile=="") or (self.instrFile=="") or (self.out_path=="")):
+        tkMessageBox.showinfo("Error", "Please Provide all inputs")
+      else:
+        self.studBook  = load_workbook(self.studFile)
+        self.studSheet = self.studBook.active
+        self.noStudents = self.studSheet['A1'].value
+        i = 0
+        self.studentList = []
+        self.courses = []
+        curr=1
+        for i in range (0,self.noStudents):
+          curr=curr+1
           rowNo = str(curr)
-          self.courseList.append(self.studSheet['A'+rowNo].value)
-          found = 0
-          self.corCode = self.studSheet['A'+rowNo].value
-          self.corValue = self.studSheet['B'+rowNo].value
-          for self.item in self.courses:
-            if (self.item.courseCode == self.corCode):
-              found = 1
-              self.item.studentList.append(self.rollNo)
-              self.item.noOfStudents = self.item.noOfStudents+1
-          if (found == 0):
-            self.courses.append(Course(courseCode = self.corCode,courseTitle = self.corValue,studentList = [self.rollNo],noOfStudents=1))
-          found = 0
-        self.student = Student(name = self.name,rollNo = self.rollNo,email=self.email,courseList = self.courseList)
-        self.studentList.append(self.student)
-        stud = None
-      for stud in self.studentList:
-        print stud.name,stud.rollNo,stud.email
-        for self.course in stud.courseList:
-          print self.course
-      stri = None
-      for stud in self.courses:
-        print stud.courseCode,stud.courseTitle,stud.noOfStudents
-        for stri in stud.studentList:
-          print stri
-      self.generateSeatingArrangement();
-      return 0
+          self.name = self.studSheet['A'+rowNo].value
+          self.rollNo = self.studSheet['B'+rowNo].value
+          self.email = self.studSheet['C'+rowNo].value
+          self.noOfCourses = self.studSheet['D'+rowNo].value
+          j = 0
+          self.courseList = []
+          for j in range (0,self.noOfCourses):
+            curr = curr+1
+            rowNo = str(curr)
+            self.courseList.append(self.studSheet['A'+rowNo].value)
+            found = 0
+            self.corCode = self.studSheet['A'+rowNo].value
+            self.corValue = self.studSheet['B'+rowNo].value
+            for self.item in self.courses:
+              if (self.item.courseCode == self.corCode):
+                found = 1
+                self.item.studentList.append(self.rollNo)
+                self.item.noOfStudents = self.item.noOfStudents+1
+            if (found == 0):
+              self.courses.append(Course(courseCode = self.corCode,courseTitle = self.corValue,studentList = [self.rollNo],noOfStudents=1))
+            found = 0
+          self.student = Student(name = self.name,rollNo = self.rollNo,email=self.email,courseList = self.courseList)
+          self.studentList.append(self.student)
+          stud = None
+        for stud in self.studentList:
+          print stud.name,stud.rollNo,stud.email
+          for self.course in stud.courseList:
+            print self.course
+        stri = None
+        for stud in self.courses:
+          print stud.courseCode,stud.courseTitle,stud.noOfStudents
+          for stri in stud.studentList:
+            print stri
+        self.generateSeatingArrangement();
+        return 0
+    except:
+      tkMessageBox.showinfo("Error", "Invalid format of input files")
 
   def generateSeatingArrangement(self):
     stud = None
