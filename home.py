@@ -23,6 +23,9 @@ from PIL import Image
 import tkFont
 import re
 
+def lalitfunction:
+	print "testing for fun"
+
 class Invigilator:
   def __init__(self,email="",name="",noOfExams=0,courses = []):
     self.email = email
